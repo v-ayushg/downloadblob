@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local development configuration
+instance/
+
+# Logs
+*.log
+
+# Python egg metadata
+*.egg-info/
+
+# Virtual environment
+venv/
+.env

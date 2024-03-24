@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Azure Blob Storage Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+</head>
+<body>
+  <div class="container mt-5">
+    <h1>Upload a File to Azure Blob Storage</h1>
+    <form method="post" enctype="multipart/form-data" action="/upload">
+        <input type="file" name="file">
+        <button type="submit">Upload</button>
+    </form>
+    </div>
+
+<div class="container mt-5">
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">Specify file name with extention</h5>
+
+          <div class="mb-3">
+          
+            <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="filename">
+          </div>
+          <button onclick="changeHref()"><a id="myLink" href="#" class="btn btn-primary">Download the file</a></button>
+        </div>
+      </div>
+    </div>
+</body>
+
+<Script>
+
+function changeHref() {
+  var exampleFormControlInput1 = document.getElementById("exampleFormControlInput1")
+  var userInput = exampleFormControlInput1.value;
+          // Get the anchor element by its id
+            var link = document.getElementById("myLink");
+            // Change the href attribute value
+            link.href = "https://agstorage2.blob.core.windows.net/uploadblob/"+userInput;
+           alert("file downloaded")
+          }
+          
+</Script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+</html>

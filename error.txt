@@ -1,1 +1,24 @@
 Hello I am an error.
+
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: Review all repository rules at http://github.com/gupta07ayush/downloadBlob/rules?ref=refs%2Fheads%2Fmain
+remote:
+remote: - GITHUB PUSH PROTECTION
+remote:   ——————————————————————————————————————————————————————
+remote:    Resolve the following secrets before pushing again.
+remote:
+remote:    (?) Learn how to resolve a blocked push
+remote:    https://docs.github.com/code-security/secret-scanning/pushing-a-branch-blocked-by-push-protection
+remote:
+remote:
+remote:   —— Azure Storage Account Access Key ——————————————————
+remote:    locations:
+remote:      - commit: f84e32524c878e31116decb987cf28aa74c1db00
+remote:        path: app.py:8
+remote:
+remote:    (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:    https://github.com/gupta07ayush/downloadBlob/security/secret-scanning/unblock-secret/2e8eMfAkf0ccSvHdu2ZQ2CrX3Le
+remote:
+To https://github.com/gupta07ayush/downloadBlob.git
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/gupta07ayush/downloadBlob.git'

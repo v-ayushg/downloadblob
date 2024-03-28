@@ -1,0 +1,19 @@
+# Ignore compiled Python files
+*.pyc
+
+# Ignore __pycache__ directories
+__pycache__
+
+# Ignore the virtual environment directory
+venv/
+
+# Ignore any local development settings or sensitive data
+*.env
+
+# Ignore any local development files or directories
+*.log
+*.db
+
+# Ignore any files or directories generated during testing
+.coverage
+htmlcov/

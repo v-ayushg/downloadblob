@@ -46,6 +46,27 @@ def get_blob_names():
 def list():
     blob_names = get_blob_names()
     return render_template('list.html', blob_names=blob_names)
+
+
+
+from flask import Flask, render_template, request, redirect, url_for
+
+
+# Function to delete a file from Azure Blob Storage
+def delete_blob(blob_name):
+    blob_client = container_client.get_blob_client(blob_name)
+    blob_client.delete_blob()
+
+
+
+# Route to delete files
+@app.route('/delete', methods=['GET', 'POST'])
+def delete():
+    if request.method == 'POST':
+        file_name = request.form['file_name']
+        delete_blob(file_name)
+        return redirect(url_for('list'))
+    return render_template('delete.html')
  
 if __name__ == '__main__':
     app.run(debug=True)

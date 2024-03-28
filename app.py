@@ -31,6 +31,21 @@ def upload():
     blob_client.upload_blob(file)
     
     return 'File uploaded successfully'
+
+
+# Function to get all file names from Azure Blob Storage
+def get_blob_names():
+    blob_names = []
+    blob_list = container_client.list_blobs()
+    for blob in blob_list:
+        blob_names.append(blob.name)
+    return blob_names
+
+# Route to display file names
+@app.route('/list')
+def list():
+    blob_names = get_blob_names()
+    return render_template('list.html', blob_names=blob_names)
  
 if __name__ == '__main__':
     app.run(debug=True)

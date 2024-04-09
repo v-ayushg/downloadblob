@@ -7,9 +7,12 @@
 </head>
 <body>
     <h1>File Names in Azure Blob Storage Container</h1>
+    <form method="POST" action="/delete-all">
+        <button type="submit">Delete All Files</button>
+    </form>
     <ul>
         {% for blob_name in blob_names %}
-            <li>{{ blob_name }}</li>
+            <li>{{ blob_name }} <form method="POST" action="/delete"><input type="hidden" name="file_name" value="{{ blob_name }}"><button type="submit">Delete</button></form></li>
         {% endfor %}
     </ul>
 </body>

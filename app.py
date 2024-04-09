@@ -67,6 +67,14 @@ def delete():
         delete_blob(file_name)
         return redirect(url_for('list'))
     return render_template('delete.html')
+
+# Route to delete all files
+@app.route('/delete-all', methods=['POST'])
+def delete_all():
+    blob_list = container_client.list_blobs()
+    for blob in blob_list:
+        delete_blob(blob.name)
+    return redirect(url_for('index'))
  
 if __name__ == '__main__':
     app.run(debug=True)

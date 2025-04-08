@@ -11,7 +11,8 @@
     <h1>Upload a File to Azure Blob Storage</h1>
     <form method="post" enctype="multipart/form-data" action="/upload">
         <input type="file" name="file">
-        <button type="submit">Upload</button>
+        <button type="submit"  onclick="alert('File uploaded successfully!');">Upload</button>
+        
     </form>
     </div>
 
@@ -38,7 +39,7 @@ function changeHref() {
           // Get the anchor element by its id
             var link = document.getElementById("myLink");
             // Change the href attribute value
-            link.href = "https://agstorage2.blob.core.windows.net/uploadblob/"+userInput;
+            link.href = "https://agbyos.blob.core.windows.net/agblob/"+userInput;
            alert("file downloaded")
           }
           

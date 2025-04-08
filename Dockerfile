@@ -22,4 +22,4 @@ COPY . /app/
 EXPOSE 5000
 
 # Run the Gunicorn server
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn",  "-b", "0.0.0.0:5000", "-t", "600", "app:app"]

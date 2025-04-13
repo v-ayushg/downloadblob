@@ -1,18 +1,17 @@
 import os
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, send_file
 from azure.identity import DefaultAzureCredential
-from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
+from azure.storage.blob import BlobServiceClient
 from azure.core.exceptions import AzureError
-from datetime import datetime, timedelta
+from io import BytesIO
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024 * 1024  # 4GB
 
-# Fetch Storage Account & Container Name from environment
+# Azure setup
 account_name = os.environ.get('AZURE_STORAGE_ACCOUNT')
 container_name = os.environ.get('AZURE_CONTAINER_NAME')
 
-# Use Managed Identity to authenticate
 try:
     credential = DefaultAzureCredential()
     blob_service_client = BlobServiceClient(
@@ -20,78 +19,81 @@ try:
         credential=credential
     )
     container_client = blob_service_client.get_container_client(container_name)
-except AzureError as e:
-    print(f"Error initializing Azure Blob client: {e}")
+except Exception as e:
+    print(f"Azure client init error: {e}")
     container_client = None
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', error=None)
 
 @app.route('/upload', methods=['POST'])
 def upload():
     if not container_client:
-        return "Storage is currently unavailable", 503
+        return render_template("index.html", error="Storage is unavailable")
 
     if 'file' not in request.files:
-        return 'No file part'
+        return render_template("index.html", error="No file part in request")
 
     file = request.files['file']
     if file.filename == '':
-        return 'No selected file'
+        return render_template("index.html", error="No file selected")
 
     try:
         blob_client = container_client.get_blob_client(file.filename)
         blob_client.upload_blob(file, overwrite=True)
         return redirect(url_for('index'))
-    except AzureError as e:
-        print(f"Upload failed: {e}")
-        return "File upload failed due to storage error", 500
+    except Exception as e:
+        return render_template("index.html", error=f"Upload error: {e}")
 
-def get_blob_names():
+@app.route('/get-download-url/<filename>', methods=['GET'])
+def get_download_url(filename):
     if not container_client:
-        return []
-    return [blob.name for blob in container_client.list_blobs()]
+        return f"Storage is unavailable", 503
+
+    try:
+        blob_client = container_client.get_blob_client(blob=filename)
+        downloader = blob_client.download_blob()
+        stream = BytesIO()
+        downloader.readinto(stream)
+        stream.seek(0)
+        return send_file(stream, download_name=filename, as_attachment=True)
+    except Exception as e:
+        return f"Download error: {e}", 500
 
 @app.route('/list')
 def list_files():
     try:
-        blob_names = get_blob_names()
-        return render_template('list.html', blob_names=blob_names)
-    except AzureError as e:
-        print(f"List failed: {e}")
-        return "Failed to list blobs", 500
+        if not container_client:
+            return render_template("index.html", error="Storage is unavailable")
+        blob_names = [blob.name for blob in container_client.list_blobs()]
+        return render_template("index.html", blob_names=blob_names)
+    except Exception as e:
+        return render_template("index.html", error=f"Listing error: {e}")
 
-def delete_blob(blob_name):
-    if container_client:
-        container_client.get_blob_client(blob_name).delete_blob()
+@app.route('/delete', methods=['POST'])
+def delete_file():
+    file_name = request.form.get("file_name")
+    if not file_name:
+        return render_template("index.html", error="No file name provided")
 
-@app.route('/delete', methods=['GET', 'POST'])
-def delete():
-    if request.method == 'POST':
-        file_name = request.form['file_name']
-        try:
-            delete_blob(file_name)
-        except AzureError as e:
-            print(f"Delete failed: {e}")
-            return "Delete operation failed", 500
-        return redirect(url_for('list_files'))
-    return render_template('delete.html')
+    try:
+        container_client.get_blob_client(blob=file_name).delete_blob()
+        return redirect(url_for('index'))
+    except Exception as e:
+        return render_template("index.html", error=f"Delete error: {e}")
 
 @app.route('/delete-all', methods=['POST'])
 def delete_all():
     if not container_client:
-        return "Storage is currently unavailable", 503
+        return render_template("index.html", error="Storage is unavailable")
 
     try:
         for blob in container_client.list_blobs():
-            delete_blob(blob.name)
+            container_client.get_blob_client(blob.name).delete_blob()
         return redirect(url_for('index'))
-    except AzureError as e:
-        print(f"Delete all failed: {e}")
-        return "Failed to delete all blobs", 500
+    except Exception as e:
+        return render_template("index.html", error=f"Delete all error: {e}")
 
-@app.route('/get-download-url/<filename>')
-def get_download_url(filename):
-    if not container_client:
-        return
+if __name__ == '__main__':
+    app.run(debug=True)

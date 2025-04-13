@@ -1,8 +1,9 @@
 import os
-from flask import Flask, flash, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for
 from azure.identity import DefaultAzureCredential
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 from azure.core.exceptions import AzureError
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024 * 1024  # 4GB
@@ -21,7 +22,7 @@ try:
     container_client = blob_service_client.get_container_client(container_name)
 except AzureError as e:
     print(f"Error initializing Azure Blob client: {e}")
-    container_client = None  # fallback to None to avoid app crash
+    container_client = None
 
 @app.route('/')
 def index():
@@ -36,7 +37,6 @@ def upload():
         return 'No file part'
 
     file = request.files['file']
-
     if file.filename == '':
         return 'No selected file'
 
@@ -48,7 +48,6 @@ def upload():
         print(f"Upload failed: {e}")
         return "File upload failed due to storage error", 500
 
-# Function to get all file names from Azure Blob Storage
 def get_blob_names():
     if not container_client:
         return []
@@ -63,7 +62,6 @@ def list_files():
         print(f"List failed: {e}")
         return "Failed to list blobs", 500
 
-# Function to delete a file
 def delete_blob(blob_name):
     if container_client:
         container_client.get_blob_client(blob_name).delete_blob()
@@ -93,5 +91,7 @@ def delete_all():
         print(f"Delete all failed: {e}")
         return "Failed to delete all blobs", 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/get-download-url/<filename>')
+def get_download_url(filename):
+    if not container_client:
+        return
